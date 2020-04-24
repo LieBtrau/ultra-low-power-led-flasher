@@ -1,10 +1,10 @@
 #pragma once
 #include <Arduino.h>
 /*! \brief Definition of pin used as SCL. */
-const byte SCL = PB3;
+const byte SCL = PB3; //SOIC8 : pin 2
 
 /*! \brief Definition of pin used as SDA. */
-const byte SDA = PB4;
+const byte SDA = PB4; //SOIC8 : pin 3
 
 /*! \brief Definition of PORT used as SCL. */
 #define PORT_SCL PORTB
@@ -19,15 +19,6 @@ const byte SDA = PB4;
 /*! \brief Definition of PIN used as SDA. */
 #define PIN_SDA PINB
 
-#define SET_SDA_OUT() DDR_SDA |= (1 << SDA)
-#define SET_SDA_IN() DDR_SDA &= ~(1 << SDA)
-
-/*! \brief Delay used to generate clock */
-#define DELAY 2
-
-/*! \brief Delay used for STOP condition */
-#define SCL_SDA_DELAY 1
-
 class TwiWire
 {
 public:
@@ -38,8 +29,6 @@ public:
     bool readRequestFrom(byte slaveAddress, byte *data, char bytes);
 
 private:
-    const byte WRITE = 0;
-    const byte READ = 1;
     byte slaveAddress; /*! \brief Slave 8 bit address (bits 7 down 1). */
     bool i2c_write_byte(bool send_start, bool send_stop, byte data);
     bool i2c_read_byte(bool nack, bool send_stop, byte& data);
