@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#ifdef ARDUINO_AVR_ATTINY13
 /*! \brief Definition of pin used as SCL. */
 const byte SCL = PB3; //SOIC8 : pin 2
 
@@ -33,3 +34,4 @@ private:
     bool i2c_write_byte(bool send_start, bool send_stop, byte data);
     bool i2c_read_byte(bool nack, bool send_stop, byte& data);
 };
+#endif

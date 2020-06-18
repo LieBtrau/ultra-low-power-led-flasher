@@ -1,5 +1,6 @@
 #include "TWI_master.h"
 
+#ifdef ARDUINO_AVR_ATTINY13
 //Some C-style boilerplate
 static bool i2c_start_cond(void);
 static bool i2c_stop_cond(void);
@@ -267,3 +268,5 @@ bool read_SDA()
 {
 	return bitRead(PIN_SDA, SDA);
 }
+
+#endif
