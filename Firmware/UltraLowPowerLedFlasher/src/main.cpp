@@ -1,3 +1,33 @@
+/** Program the RTC on the ultra low power LED flasher
+    Copyright (C) 2021 Christoph Tack
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://github.com/LieBtrau/ultra-low-power-led-flasher
+
+    After the RTC is programmed, it runs standalone and the Arduino can be disconnected.
+
+    Programming connections:
+	---------------------------------------------
+    Signal		BRD200321.CN2		Protrinket 3V
+	------		-------------		-------------
+	VCC			2					3V
+	SCL			3					A5
+	SDA			4					A4
+	GND			6					G
+ */
+
 #include <Arduino.h>
 #ifdef ARDUINO_AVR_ATTINY13
 #include "TWI_master.h"
@@ -11,9 +41,9 @@ static bool readRegister(byte reg, byte &value);
 static bool eeprombusy(bool &busy);
 const byte REF_STATUS = 0x0E;
 #ifdef ARDUINO_AVR_ATTINY13
-const byte RV3028_ADDR = 0xA4;  //address in bit 7-1
+const byte RV3028_ADDR = 0xA4; //address in bit 7-1
 #else
-const byte RV3028_ADDR = 0x52;  //address in bit 6-0
+const byte RV3028_ADDR = 0x52; //address in bit 6-0
 #endif
 const byte REG_CTRL1 = 0x0F;
 const byte REG_EEADDR = 0x25;
@@ -26,45 +56,45 @@ const byte CMD_WRITE_EEPROM = 0x21;
 
 void setup()
 {
-  #ifdef ARDUINO_AVR_PROTRINKET3FTDI
-  Serial.begin(9600);
-  while (!Serial)
-  {
-  }
-  Serial.println("Start");
-  #endif
-  Wire.begin();
-  //automatic refresh function has to be disabled (EERD = 1): register 0Fh, bit 3
-  if (!writeRegister(REG_CTRL1, 1 << EERD_bit))
-  {
-    return;
-  }
-  bool busy = false;
-  if (!eeprombusy(busy) || busy)
-  {
-    return;
-  }
-  //Configuration EEPROM with RAM mirror, Address 2Bh and 30h to 37h: 35h EEPROM CLKOUT
-  //3.15.4. EEPROM CLKOUT REGISTER
-  if (!writeRegister(REG_EEADDR, REG_EECLKOUT) ||
-      !writeRegister(REG_EEDATA, 0xC3) ||
-      //Before entering the command 11h, 12h, 21h or 22h, EECMD has to be written with 00h.
-      !writeRegister(REG_EECMD, 0x00) ||
-      !writeRegister(REG_EECMD, CMD_WRITE_EEPROM))
-  {
-    return;
-  }
-  //wait for eeprom
-  while (eeprombusy(busy) && busy)
-  {
-    delay(10);
-  }
-  if (!writeRegister(REG_CTRL1, 0x00))
-  {
-    return;
-  }
 #ifdef ARDUINO_AVR_PROTRINKET3FTDI
-  Serial.println("RTC programmed OK");
+	Serial.begin(9600);
+	while (!Serial)
+	{
+	}
+	Serial.println("Start");
+#endif
+	Wire.begin();
+	//automatic refresh function has to be disabled (EERD = 1): register 0Fh, bit 3
+	if (!writeRegister(REG_CTRL1, 1 << EERD_bit))
+	{
+		return;
+	}
+	bool busy = false;
+	if (!eeprombusy(busy) || busy)
+	{
+		return;
+	}
+	//Configuration EEPROM with RAM mirror, Address 2Bh and 30h to 37h: 35h EEPROM CLKOUT
+	//3.15.4. EEPROM CLKOUT REGISTER
+	if (!writeRegister(REG_EEADDR, REG_EECLKOUT) ||
+		!writeRegister(REG_EEDATA, 0xC3) ||
+		//Before entering the command 11h, 12h, 21h or 22h, EECMD has to be written with 00h.
+		!writeRegister(REG_EECMD, 0x00) ||
+		!writeRegister(REG_EECMD, CMD_WRITE_EEPROM))
+	{
+		return;
+	}
+	//wait for eeprom
+	while (eeprombusy(busy) && busy)
+	{
+		delay(10);
+	}
+	if (!writeRegister(REG_CTRL1, 0x00))
+	{
+		return;
+	}
+#ifdef ARDUINO_AVR_PROTRINKET3FTDI
+	Serial.println("RTC programmed OK");
 #endif
 }
 
@@ -74,49 +104,49 @@ void loop()
 
 bool writeRegister(byte reg, byte value)
 {
-  Wire.beginTransmission(RV3028_ADDR);
+	Wire.beginTransmission(RV3028_ADDR);
 #ifdef ARDUINO_AVR_ATTINY13
-  byte data[2] = {reg, value};
-  return Wire.writeEndTransmission(data, sizeof(data), true);
+	byte data[2] = {reg, value};
+	return Wire.writeEndTransmission(data, sizeof(data), true);
 #else
-  Wire.write(reg);
-  Wire.write(value);
-  return Wire.endTransmission() == 0;
+	Wire.write(reg);
+	Wire.write(value);
+	return Wire.endTransmission() == 0;
 #endif
 }
 
 bool readRegister(byte reg, byte &value)
 {
-  Wire.beginTransmission(RV3028_ADDR);
+	Wire.beginTransmission(RV3028_ADDR);
 #ifdef ARDUINO_AVR_ATTINY13
-  if (!Wire.writeEndTransmission(&reg, 1, false))
-  {
-    return false;
-  }
-  return Wire.readRequestFrom(RV3028_ADDR, &value, 1);
+	if (!Wire.writeEndTransmission(&reg, 1, false))
+	{
+		return false;
+	}
+	return Wire.readRequestFrom(RV3028_ADDR, &value, 1);
 #else
-  Wire.write(reg);
-  if (Wire.endTransmission(false) != 0)
-  {
-    return false;
-  }
-  if ((Wire.requestFrom(RV3028_ADDR, 1) != 1) || Wire.available() != 1)
-  {
-    return false;
-  }
-  value = Wire.read();
+	Wire.write(reg);
+	if (Wire.endTransmission(false) != 0)
+	{
+		return false;
+	}
+	if ((Wire.requestFrom(RV3028_ADDR, 1) != 1) || Wire.available() != 1)
+	{
+		return false;
+	}
+	value = Wire.read();
 #endif
-  return true;
+	return true;
 }
 
 bool eeprombusy(bool &busy)
 {
-  //busy status bit EEbusy has to indicate, that the last transfer has been finished (EEbusy = 0)
-  byte status = 0;
-  if (!readRegister(REF_STATUS, status))
-  {
-    return false;
-  }
-  busy = bitRead(status, EEBusy_bit);
-  return true;
+	//busy status bit EEbusy has to indicate, that the last transfer has been finished (EEbusy = 0)
+	byte status = 0;
+	if (!readRegister(REF_STATUS, status))
+	{
+		return false;
+	}
+	busy = bitRead(status, EEBusy_bit);
+	return true;
 }
