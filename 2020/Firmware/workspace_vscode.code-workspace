@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "UltraLowPowerLedFlasher"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"wiring_private.h": "c"
+		}
+	}
+}
