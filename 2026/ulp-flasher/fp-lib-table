@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "g-tssop") (type "KiCad") (uri "${GITPLM_PARTS}/footprints/g-tssop.pretty") (options "") (descr ""))
+)
