@@ -1,3 +1,5 @@
-info/*
 README
-Hardware/*
+Hardware/Gerber_*
+*.asc
+*.log
+*.raw
