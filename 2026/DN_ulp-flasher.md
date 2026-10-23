@@ -16,6 +16,13 @@ The one-shot timer consumes less when it operates on a lower voltage level.  The
 More details on [LDO](./Info/LDO.md)
 
 # Oscillator
+## Operation
+At power up, C5 is discharged.  Q2 is blocked and OSC_OUT is high.  C5 starts charging through R1+R2.  Q3 is conducting.  It's emitter is held at the sum of its base voltage (ardound 300 mV) and its Vbe voltage.
+
+Once C5 is charged enough, Q2 will conduct, pulling OSC_OUT low.  As C4 is charged, it will pull the base of Q3 below GND, allowing for rapid discharge of C5.
+As C5 is discharged, Q3 will turn off and the cycle repeats.
+
+## Changes
 The oscillator consumes less current when it operates on a lower voltage level.  D1 and D3 are used to lower the operating voltage.  Care has to be taken that the output levels on the collector of Q2 are still outside U1./A's schmitt-trigger hysteresis zone.  The collector of Q2 has to rise to at least 1.2 V.  
 
 C1 reduces power supply impedance for the high frequency pulses.  It considerably reduces the ripple at the cathode of D3.
